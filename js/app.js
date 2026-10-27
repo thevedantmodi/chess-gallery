@@ -270,7 +270,6 @@ function startGame() {
   db.current = { sans: [], bot: bot.id, color };
   save();
   renderPlay();
-  fx.shutter();
   if (!bot.pass && color === "b") engineMove();
 }
 
@@ -365,8 +364,8 @@ function drawOver() {
   const lost = !bot.pass && !won && rec.result !== "1/2-1/2";
   let quote = "";
   if (bot.pass) quote = "Hung and signed.";
-  else if (won) quote = i >= 0 && i < BOTS.length - 1 ? `Next wall: ${BOTS[i + 1].name}.` : "You've cleared the gallery.";
-  else if (lost) quote = "Develop the game to see where it turned.";
+  else if (won) quote = i >= 0 && i < BOTS.length - 1 ? `Next up: ${BOTS[i + 1].name}.` : "You've cleared the ladder.";
+  else if (lost) quote = "Analyze the game to see where it turned.";
   else quote = "A draw. Honours even.";
   const w = rec.white;
   const b = rec.black;
@@ -378,7 +377,7 @@ function drawOver() {
       <div class="quote">${esc(quote)}</div>
     </div>
     <div class="stack">
-      <button class="btn block" data-a="review-new">Develop this game</button>
+      <button class="btn block" data-a="review-new">Analyze this game</button>
       <button class="btn ghost block" data-a="rematch">Rematch</button>
       <button class="btn ghost block" data-a="newgame">New game</button>
     </div>`;
@@ -410,7 +409,6 @@ function doMove(m) {
   const g = p.game;
   const kind = g.inCheck() ? "check" : mv.captured ? "capture" : "move";
   if (!g.isGameOver()) fx.play(kind);
-  if (mv.captured || g.inCheck()) fx.shutter();
   drawPlay(true);
   db.current = { sans: g.history(), bot: p.bot.id, color: p.color };
   save();
@@ -490,7 +488,6 @@ function finishGame(result, reason) {
   const won = !p.bot.pass && ((result === "1-0" && p.color === "w") || (result === "0-1" && p.color === "b"));
   const lost = !p.bot.pass && !won && result !== "1/2-1/2";
   fx.play(won ? "win" : lost ? "lose" : "end");
-  fx.shutter();
   const you = p.bot.pass ? null : "You";
   const white = p.bot.pass ? "White" : p.color === "w" ? you : p.bot.name;
   const black = p.bot.pass ? "Black" : p.color === "b" ? you : p.bot.name;
@@ -543,7 +540,7 @@ function renderGames() {
         <span class="name">${esc(g.white)} — ${esc(g.black)}</span>
         <span class="end">${esc(g.result.replace("1/2-1/2", "½–½"))}</span>
         <span class="sub">${g.plies} plies · ${esc(g.reason)} · ${fmtDate(g.date)}</span>
-        <span class="sub end">${acc != null ? acc + "%" : "Undeveloped"}</span></button>`;
+        <span class="sub end">${acc != null ? acc + "%" : "Not analyzed"}</span></button>`;
     }
     html += "</div>";
   }
@@ -604,7 +601,7 @@ function renderReview() {
       return `<div><div class="label">${esc(name)}</div><div class="big" style="margin:6px 0 4px">${s.acc}%</div>
         <div class="muted">${s.blunder} blunders<br>${s.mistake} mistakes<br>${s.inaccuracy} inaccuracies</div></div>`;
     };
-    summary = `<div class="group-head"><span>Accuracy</span><span class="count">developed</span></div>
+    summary = `<div class="group-head"><span>Accuracy</span><span class="count">analyzed</span></div>
       <div class="twocol" style="margin-top:12px">${col("w", rec.white)}${col("b", rec.black)}</div>`;
   }
   el.innerHTML = `
@@ -623,7 +620,7 @@ function renderReview() {
       ${
         rv
           ? ""
-          : `<div class="stack"><button class="btn block" data-a="develop" id="devbtn">Develop this game</button>
+          : `<div class="stack"><button class="btn block" data-a="develop" id="devbtn">Analyze this game</button>
              <div class="progress" id="prog" hidden><i></i></div>
              <p class="muted" style="margin:0">Stockfish checks every position on your phone. About ${Math.max(10, Math.round(N * 0.7))} seconds.</p></div>`
       }
@@ -695,7 +692,7 @@ function drawReview() {
   let cap = "";
   let copyBtn = "";
   if (!m) cap = `<span class="muted">${esc(R.rec.result.replace("1/2-1/2", "½–½"))} · ${esc(R.rec.reason)}</span>`;
-  else if (!pl) cap = `<b>${num} ${esc(m.san)}</b> <span class="muted">Develop the game to see how this move held up.</span>`;
+  else if (!pl) cap = `<b>${num} ${esc(m.san)}</b> <span class="muted">Analyze the game to see how this move held up.</span>`;
   else {
     const isBest = pl.best === m.from + m.to + (m.promotion || "");
     const ev = `${pl.cpAfter >= 0 ? "+" : ""}${(pl.cpAfter / 100).toFixed(1)}`;
@@ -774,7 +771,7 @@ async function develop() {
       R.busy = false;
       return;
     }
-    btn.textContent = `Developing… ${i} / ${N + 1}`;
+    btn.textContent = `Analyzing… ${i} / ${N + 1}`;
     prog.firstElementChild.style.width = (i / (N + 1)) * 100 + "%";
     const c = new Chess(R.fens[i]);
     if (c.isGameOver()) {
@@ -825,12 +822,11 @@ async function develop() {
   save();
   R.busy = false;
   fx.play("good");
-  fx.shutter();
   const k = keyMoments(R);
   R.idx = k.length ? k[0] : 0;
   renderReview();
   updateTabDot();
-  if (newPuzzles.length) toast(`${newPuzzles.length} added to Retake`);
+  if (newPuzzles.length) toast(`${newPuzzles.length} added to Puzzles`);
 }
 
 /* ───────────────────────── RETAKE ───────────────────────── */
@@ -842,7 +838,7 @@ function renderRetake() {
   const done = db.puzzles.length - open.length;
   el.innerHTML = `
     <div class="reveal">
-      <h2>Retake</h2>
+      <h2>Puzzles</h2>
       <p class="muted" style="margin:6px 0 0">Positions from your own games where a better move was on the board. Find it this time.</p>
       <div class="group-head" style="margin-top:24px"><span>Session</span><span class="count">${open.length} waiting</span></div>
       <div class="twocol" style="margin:14px 0 20px">
@@ -852,7 +848,7 @@ function renderRetake() {
       ${
         open.length
           ? `<button class="btn block" data-a="tstart">Start retaking</button>`
-          : `<div class="placard"><span class="label">Nothing waiting</span><div class="meta">Develop a finished game in the Games tab. Your blunders and mistakes arrive here as puzzles.</div>
+          : `<div class="placard"><span class="label">Nothing waiting</span><div class="meta">Analyze a finished game in the Games tab. Your blunders and mistakes arrive here as puzzles.</div>
              <div class="actions"><button class="text-btn ul" data-a="tab" data-t="games" style="font-weight:700">Go to Games</button></div></div>`
       }
     </div>`;
@@ -890,7 +886,7 @@ function renderPuzzle() {
   T.revealed = false;
   el.innerHTML = `
     <div class="reveal">
-      <div class="row-between"><button class="text-btn ul" data-a="tend">← Retake</button><span class="muted">${T.i + 1} of ${T.list.length}</span></div>
+      <div class="row-between"><button class="text-btn ul" data-a="tend">← Puzzles</button><span class="muted">${T.i + 1} of ${T.list.length}</span></div>
       <h2 style="margin-top:8px">${turn === "w" ? "White" : "Black"} to move</h2>
       <div class="muted">In your game you played ${esc(pz.played)}. Find something better.</div>
       <div class="boardrow"><div id="b-pz"></div><div class="gauge off"><i></i></div></div>
@@ -970,7 +966,6 @@ async function judge(from, to, promotion) {
     T.busy = false;
     T.done = true;
     fx.play("good");
-    fx.shutter();
     pz.solved += 1;
     db.stats.solved += 1;
     db.stats.streak += 1;
@@ -1022,8 +1017,8 @@ function renderSettings() {
           : '<p class="muted" style="margin:0">Install it: open the Share menu in Safari and choose Add to Home Screen (on Android, Install app). Do it once while you have signal.</p>'
       }
       <div class="group-head"><span>Play</span></div>
-      ${row("Pieces", "Two New York skylines.", `<div class="seg"><button class="text-btn ul" data-a="pieces" data-v="a" aria-pressed="${settings.pieces !== "b"}">Landmarks</button><span class="sep">|</span>
-        <button class="text-btn ul" data-a="pieces" data-v="b" aria-pressed="${settings.pieces === "b"}">Supertalls</button></div>`)}
+      ${row("Pieces", "Minimalist metal prisms.", `<div class="seg"><button class="text-btn ul" data-a="pieces" data-v="a" aria-pressed="${settings.pieces !== "b"}">Platinum</button><span class="sep">|</span>
+        <button class="text-btn ul" data-a="pieces" data-v="b" aria-pressed="${settings.pieces === "b"}">Gold</button></div>`)}
       ${row("Sound", "Wooden clicks, synthesized. No files.", onoff("sound"))}
       ${row("Haptics", "A tap when pieces land.", onoff("haptics"))}
       ${row("Eval gauge", "A thin bar beside the board. Off trains your eye.", onoff("gauge"))}
@@ -1036,7 +1031,7 @@ function renderSettings() {
       <p class="muted" style="margin-top:8px">Games, puzzles and progress are stored only on this device.</p>
       <div class="group-head"><span>Credits</span></div>
       <p class="muted" style="margin:10px 0 0;line-height:1.5">Engine: Stockfish 19 (GPLv3), compiled to WebAssembly by Nathan Rugg.<br>
-      Rules: chess.js (BSD-2). Pieces: original NYC skyline sets.<br>Type: Geist (OFL). Design: Photo Maps.</p>
+      Rules: chess.js (BSD-2). Pieces: original metallic prism sets.<br>Type: Geist (OFL).</p>
     </div>`;
   paintOfflineLine();
 }
@@ -1226,7 +1221,7 @@ const actions = {
   },
   copypgn: () => copy(S.r.rec.pgn),
   delgame: () =>
-    confirmSheet("Delete this game?", "This also removes its retake positions.", "Delete", () => {
+    confirmSheet("Delete this game?", "This also removes its puzzle positions.", "Delete", () => {
       const id = S.r.rec.id;
       db.games = db.games.filter((g) => g.id !== id);
       db.puzzles = db.puzzles.filter((p) => p.gameId !== id);
@@ -1299,7 +1294,6 @@ document.querySelectorAll(".tab").forEach((t) =>
 );
 document.querySelectorAll(".theme-switch [data-option]").forEach((b) => b.addEventListener("click", () => setTheme(b.dataset.option)));
 $("#logo").addEventListener("click", () => {
-  fx.shutter();
   go("play");
 });
 

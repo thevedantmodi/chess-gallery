@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Chess Gallery</title>
-<meta name="description" content="Play and review chess offline. A museum of games.">
+<title>Chess</title>
+<meta name="description" content="Play and review chess offline.">
 <meta name="theme-color" content="#ededeb" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1c1c1c" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Chess Gallery">
+<meta name="apple-mobile-web-app-title" content="Chess">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
 <script>
-// Before first paint, so the page never flashes the wrong theme (same as Photo Maps).
+// Before first paint, so the page never flashes the wrong theme .
 (function(){try{var m=localStorage.getItem('theme-manual')==='1';var s=localStorage.getItem('theme');var t=m&&(s==='light'||s==='dark')?s:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 </script>
 <link rel="stylesheet" href="css/app.css">
@@ -23,18 +23,9 @@
 <body>
 <div id="shell">
   <header class="sh">
-    <button class="sh-logo" id="logo" aria-label="Chess Gallery">
-      <svg class="mark" width="34" height="26" viewBox="0 0 40 30" stroke-width="1.7" aria-hidden="true">
-        <path d="M4 9h8l2-4h12l2 4h8a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2z"/>
-        <rect class="cam-shutter" x="30" y="6" width="5" height="3"/>
-        <circle cx="20" cy="18" r="8.5"/>
-        <g class="cam-meridian">
-          <circle cx="20" cy="14.6" r="2"/>
-          <path d="M17.6 22.4l1.1-4.2h2.6l1.1 4.2z"/>
-          <path d="M16.9 22.4h6.2"/>
-        </g>
-      </svg>
-      <span>Chess Gallery</span>
+    <button class="sh-logo" id="logo" aria-label="Chess">
+      <svg class="mark" width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="1" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7"/><rect class="mk" x="13" y="1" width="12" height="12" fill="currentColor" stroke="none"/><rect class="mk" x="1" y="13" width="12" height="12" fill="currentColor" stroke="none"/></svg>
+      <span>Chess</span>
     </button>
     <div class="theme-switch" role="group" aria-label="Theme">
       <button class="text-btn ul" data-option="light" type="button">Light</button>
@@ -53,13 +44,13 @@
   <nav class="tabs" aria-label="Sections">
     <button class="tab" data-tab="play"><span class="label ul">Play</span></button>
     <button class="tab" data-tab="games"><span class="label ul">Games</span></button>
-    <button class="tab" data-tab="retake"><span class="label ul">Retake</span></button>
+    <button class="tab" data-tab="retake"><span class="label ul">Puzzles</span></button>
     <button class="tab" data-tab="settings"><span class="label ul">Settings</span></button>
   </nav>
 </div>
 <div class="lights" aria-hidden="true"></div>
 <div id="sheet-root"></div>
-<noscript><p style="padding:24px">Chess Gallery needs JavaScript.</p></noscript>
+<noscript><p style="padding:24px">Chess needs JavaScript.</p></noscript>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>

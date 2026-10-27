@@ -1,4 +1,4 @@
-// Haptics (ported from Photo Maps' haptics.ts) and tiny synthesized sounds.
+// Haptics and tiny synthesized sounds.
 // No audio files, so nothing extra to cache.
 
 let soundOn = true;
@@ -153,21 +153,5 @@ export const fx = {
   },
   tap() {
     haptic(6);
-  },
-  /** The mark's shutter clicks (Photo Maps does this when a photo opens). */
-  shutter() {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    document.querySelectorAll(".mark .cam-shutter").forEach((el) =>
-      el.animate([{ transform: "none" }, { transform: "translateY(1.2px)", offset: 0.35 }, { transform: "none" }], {
-        duration: 260,
-        easing: "cubic-bezier(0.2, 0, 0, 1)",
-      }),
-    );
-    document.querySelectorAll(".mark .cam-meridian").forEach((el) =>
-      el.animate([{ transform: "scaleX(1)" }, { transform: "scaleX(0.02)" }, { transform: "scaleX(-1)" }], {
-        duration: 320,
-        easing: "cubic-bezier(0.2, 0, 0, 1)",
-      }),
-    );
   },
 };

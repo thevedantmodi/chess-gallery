@@ -1,109 +1,129 @@
-"""Generate the piece themes into vendor/pieces/<theme>/*.svg (original flat silhouettes).
+"""Generate the piece themes into vendor/pieces/<theme>/*.svg.
 
-Both themes are New York skylines; both colours use the same buildings. Solid fills, windows as
-cut-outs, a darker right face for depth, a thin same-hue edge so pieces read on both square colours.
-  a "Landmarks"  P water tower, R Guggenheim, N Flatiron, B Chrysler, K One WTC, Q 270 Park Ave
-                 colours: taxi yellow (white side) vs harbour teal (black side)
-  b "Supertalls" P brownstone, R 30 Rock, N 432 Park, B Steinway Tower, K Empire State, Q Central Park Tower
-                 colours: black and white
+Minimalist metallic pieces built from three primitives: isometric prisms, pyramids and spheres,
+each shaded with brushed-metal gradients (lit top, mid left face, dark right face).
+  a "Platinum"  polished silver (white side) vs gunmetal (black side)
+  b "Gold"      champagne gold (white side) vs obsidian (black side)
+Height order: K > Q > B > R > N > P.
 """
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent / "vendor" / "pieces"
-
-GROUND = "M20 86h60v3H20z"
-
-
-def hole(x, y, w, h):
-    """Rectangular sub-path; inside an evenodd path it cuts a window."""
-    return f"M{x} {y}h{w}v{h}h-{w}z"
+CX = 50
 
 
-def grid(x0, y0, cols, rows, w, h, dx, dy):
-    return "".join(hole(x0 + c * dx, y0 + r * dy, w, h) for c in range(cols) for r in range(rows))
+def P(*pts):
+    return " ".join(f"{x:.2f},{y:.2f}" for x, y in pts)
 
 
-# Each piece is a list of path 'd' strings (one element each, evenodd so windows cut through).
-A = {
-    "P": [  # wooden water tower on a steel frame
-        "M35 34L50 18l15 16z",
-        "M37 34h26v28H37z" + hole(37, 41, 26, 2) + hole(37, 50, 26, 2),
-        "M39 62h4v24h-4zM57 62h4v24h-4z",
-        "M43 64l14 20-3 2-14-20zM57 64L43 84l3 2 14-20z",
-        "M49 12h2v7h-2z",
-    ],
-    "R": [  # Guggenheim: widening ziggurat under a low glass dome
-        "M37 88V78h26v10zM33 78V66h34v12zM29 66V54h42v12zM25 54V44h50v10z"
-        + hole(40, 82, 6, 4) + hole(54, 82, 6, 4),
-        "M29 44Q50 26 71 44z",
-        "M48 30h4v4h-4z",
-    ],
-    "N": [  # Flatiron: tall prow with a heavy cornice
-        "M24 88V36L50 26L66 32V88z" + grid(29, 42, 3, 5, 5, 6, 7, 9) + grid(53, 43, 2, 5, 4, 6, 5.5, 9),
-        "M22 36L50 24L68 31V35L50 29L22 40z",
-    ],
-    "B": [  # Chrysler: setback shaft, terraced steel crown, needle
-        "M30 88V74H36V50H64V74H70V88z" + grid(41, 56, 3, 2, 4, 7, 6, 9),
-        "M36 50C36 34 43 24 50 18C57 24 64 34 64 50z"
-        + "M44 44l3-6 3 6zM50 44l3-6 3 6zM41 36l3-5 3 5zM53 36l3-5 3 5zM47 29l3-5 3 5z",
-        "M49 20L50 4l1 16z",
-    ],
-    "K": [  # One WTC: tapering prism, parapet, spire
-        "M32 88L38 28H62L68 88z" + grid(41, 34, 3, 7, 4, 4, 6, 7),
-        "M44 24h12v4H44z",
-        "M49 24L50 3l1 21z",
-    ],
-    "Q": [  # 270 Park Avenue: stepped taper, angled crown
-        "M26 88L32 64H36L40 44H43L46 26L50 10L54 26L57 44H60L64 64H68L74 88z"
-        + grid(44, 48, 2, 5, 4, 4, 8, 7) + hole(47, 76, 6, 10),
-    ],
+def prism(w, yt, yb, slot=False):
+    """Square prism seen isometrically: [(face, points)]. yt/yb are the left/right edge heights."""
+    d, l, r = w * 0.25, CX - w / 2, CX + w / 2
+    out = [
+        ("l", P((l, yt), (CX, yt + d), (CX, yb + d), (l, yb))),
+        ("r", P((CX, yt + d), (r, yt), (r, yb), (CX, yb + d))),
+        ("t", P((l, yt), (CX, yt - d), (r, yt), (CX, yt + d))),
+    ]
+    if slot:  # hollow top, for the rook
+        s = 0.3
+        out.append(("s", P((CX - w * s, yt), (CX, yt - d * 0.6), (CX + w * s, yt), (CX, yt + d * 0.6))))
+    return out
+
+
+def pyramid(w, yb, ytip):
+    d, l, r = w * 0.25, CX - w / 2, CX + w / 2
+    return [
+        ("l", P((l, yb), (CX, yb + d), (CX, ytip))),
+        ("r", P((CX, yb + d), (r, yb), (CX, ytip))),
+    ]
+
+
+def wedge(w, yt, yb, f):
+    """Prism whose top slopes down toward the front-right by f."""
+    d, l, r = w * 0.25, CX - w / 2, CX + w / 2
+    return [
+        ("l", P((l, yt), (CX, yt + d + f), (CX, yb + d), (l, yb))),
+        ("r", P((CX, yt + d + f), (r, yt + f), (r, yb), (CX, yb + d))),
+        ("t", P((l, yt), (CX, yt - d), (r, yt + f), (CX, yt + d + f))),
+    ]
+
+
+def sphere(cy, r):
+    return [("o", (CX, cy, r))]
+
+
+PLINTH = prism(46, 80, 88)
+
+SHAPES = {
+    "P": prism(26, 60, 80) + sphere(48, 11),
+    "R": prism(26, 38, 80) + prism(34, 24, 38, slot=True),
+    "N": prism(34, 66, 80) + wedge(26, 30, 66, 16),
+    "B": prism(24, 44, 80) + pyramid(24, 44, 8),
+    "Q": prism(32, 56, 80) + prism(22, 28, 56) + sphere(18, 9),
+    "K": prism(34, 58, 80) + prism(22, 32, 58) + prism(6, 8, 32) + prism(20, 16, 20),
 }
 
-B = {
-    "P": [  # brownstone with a stoop and cornice
-        "M30 36H70V88H30z" + grid(36, 44, 2, 3, 7, 10, 18, 14),
-        "M27 32H73V38H27z",
-        "M30 74L16 88H30z",
-    ],
-    "R": [  # 30 Rock: stepped slab
-        "M32 88V58H36V40H40V22H44V12H56V22H60V40H64V58H68V88z" + grid(45, 18, 2, 8, 3, 7, 7, 8),
-    ],
-    "N": [  # 432 Park: square-grid tower, open floors, low neighbour
-        "M40 6H60V88H40z" + grid(42.5, 10, 2, 9, 7, 6, 8, 8.6) + hole(40, 38, 20, 3) + hole(40, 62, 20, 3),
-        "M26 66H40V88H26z",
-    ],
-    "B": [  # Steinway Tower: pencil-thin, terraced
-        "M36 88V68H40V48H44V16L50 5L56 16V48H60V68H64V88z"
-        + hole(47, 20, 6, 3) + grid(46, 30, 2, 6, 2, 8, 6, 9) + hole(43, 74, 4, 8) + hole(53, 74, 4, 8),
-    ],
-    "Q": [  # Central Park Tower: podium, slim shaft, raked crown
-        "M30 88V74H40V50H43V20L57 8V50H60V74H70V88z" + grid(46, 24, 2, 5, 3, 6, 5, 9),
-        "M49 2h2v8h-2z",
-    ],
-    "K": [  # Empire State
-        "M28 88V62H36V52H40V34H44V26H46V18H48V9H52V18H54V26H56V34H60V52H64V62H72V88z"
-        + grid(32, 66, 4, 2, 4, 8, 10, 10) + hole(46, 38, 3, 10) + hole(51, 38, 3, 10),
-        "M48.5 9L50 0l1.5 9z",
-    ],
-}
+# metal ramps: (offset, colour) stops per face; brushed bands give the polished look
+SILVER = dict(
+    t=[(0, "#ffffff"), (1, "#d3dae2")],
+    l=[(0, "#f4f6f9"), (0.45, "#c3cad3"), (0.5, "#8f99a6"), (1, "#dde2e8")],
+    r=[(0, "#b8c0ca"), (0.45, "#8a94a1"), (0.5, "#5a6471"), (1, "#8c96a3")],
+    o=[(0, "#ffffff"), (0.45, "#b9c1cb"), (1, "#566170")],
+)
+GUNMETAL = dict(
+    t=[(0, "#6a7280"), (1, "#323843")],
+    l=[(0, "#4a515d"), (0.45, "#2e333c"), (0.5, "#1a1d23"), (1, "#3a404a")],
+    r=[(0, "#2a2f37"), (0.45, "#181b20"), (0.5, "#0b0c0f"), (1, "#1c1f25")],
+    o=[(0, "#8a93a1"), (0.4, "#363c47"), (1, "#0d0f12")],
+)
+GOLD = dict(
+    t=[(0, "#fff6d0"), (1, "#ecd07a")],
+    l=[(0, "#fbe9a5"), (0.45, "#dcb95a"), (0.5, "#a8802a"), (1, "#e9cf7d")],
+    r=[(0, "#c9a042"), (0.45, "#a47c2a"), (0.5, "#6f4f16"), (1, "#a67f2e")],
+    o=[(0, "#fffbe6"), (0.4, "#e0bd5c"), (1, "#7a5718")],
+)
+OBSIDIAN = dict(
+    t=[(0, "#4b4f5a"), (1, "#1c1e24")],
+    l=[(0, "#33363f"), (0.45, "#1f2127"), (0.5, "#0e0f12"), (1, "#2a2d34")],
+    r=[(0, "#1a1c21"), (0.45, "#0f1013"), (0.5, "#050506"), (1, "#121316")],
+    o=[(0, "#7d828f"), (0.4, "#23262d"), (1, "#050506")],
+)
+THEMES = {"a": {"w": SILVER, "b": GUNMETAL}, "b": {"w": GOLD, "b": OBSIDIAN}}
 
-# theme -> (shapes, {side: (fill, edge)})
-THEMES = {
-    "a": (A, {"w": ("#f2b705", "#a67c00"), "b": ("#17606a", "#0b3a41")}),
-    "b": (B, {"w": ("#fbf9f4", "#8d8678"), "b": ("#24262b", "#6b6f78")}),
-}
 
-for name, (shapes, sides) in THEMES.items():
+def gradients(pal):
+    out = []
+    for k, stops in pal.items():
+        s = "".join(f'<stop offset="{o}" stop-color="{c}"/>' for o, c in stops)
+        if k == "o":
+            out.append(f'<radialGradient id="g{k}" cx=".35" cy=".3" r=".8">{s}</radialGradient>')
+        else:
+            out.append(f'<linearGradient id="g{k}" x1="0" y1="0" x2="1" y2="1">{s}</linearGradient>')
+    return "".join(out)
+
+
+def render(parts, pal):
+    out = []
+    for face, geo in parts:
+        if face == "o":
+            cx, cy, r = geo
+            out.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="url(#go)"/>')
+        elif face == "s":
+            out.append(f'<polygon points="{geo}" fill="#000" fill-opacity=".45" stroke="none"/>')
+        else:
+            out.append(f'<polygon points="{geo}" fill="url(#g{face})"/>')
+    return "".join(out)
+
+
+for name, sides in THEMES.items():
     out = ROOT / name
     out.mkdir(parents=True, exist_ok=True)
-    for side, (fill, edge) in sides.items():
-        for p, parts in shapes.items():
-            body = "".join(f'<path d="{d}"/>' for d in parts + [GROUND])
+    for side, pal in sides.items():
+        for p, parts in SHAPES.items():
             svg = (
-                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill-rule="evenodd">'
-                f'<clipPath id="c">{body}</clipPath>'
-                f'<g fill="{fill}" stroke="{edge}" stroke-width="1.2" stroke-linejoin="round">{body}</g>'
-                '<rect x="50" y="0" width="50" height="100" fill="#000" fill-opacity=".2" clip-path="url(#c)"/>'
-                "</svg>"
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
+                f"<defs>{gradients(pal)}</defs>"
+                '<g stroke="#fff" stroke-opacity=".28" stroke-width=".7" stroke-linejoin="round">'
+                f"{render(PLINTH, pal)}{render(parts, pal)}</g></svg>"
             )
             (out / f"{side}{p}.svg").write_text(svg)

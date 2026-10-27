@@ -1,7 +1,7 @@
 {
-  "name": "Chess Gallery",
+  "name": "Chess",
   "short_name": "Chess",
-  "description": "Play and review chess offline. A museum of games.",
+  "description": "Play and review chess offline.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
