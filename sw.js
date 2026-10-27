@@ -1,7 +1,7 @@
 // Offline-first service worker. Everything the app needs (engine, rules, pieces, fonts) is
 // precached on first visit, so after that it runs with no connection at all.
 // Bump VERSION when you ship a new build.
-const VERSION = "v4";
+const VERSION = "v5";
 const CACHE = `chess-gallery-${VERSION}`;
 
 const PRECACHE = [
@@ -22,7 +22,9 @@ const PRECACHE = [
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/apple-touch-icon.png",
-  ...["wK", "wQ", "wR", "wB", "wN", "wP", "bK", "bQ", "bR", "bB", "bN", "bP"].map((p) => `vendor/pieces/${p}.svg`),
+  ...["a", "b"].flatMap((t) =>
+    ["wK", "wQ", "wR", "wB", "wN", "wP", "bK", "bQ", "bR", "bB", "bN", "bP"].map((p) => `vendor/pieces/${t}/${p}.svg`),
+  ),
 ];
 
 self.addEventListener("install", (event) => {

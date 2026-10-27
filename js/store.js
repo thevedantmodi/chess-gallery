@@ -11,7 +11,7 @@ const DEFAULT_DB = {
   current: null, // in-progress game: {sans, bot, color}
 };
 
-const DEFAULT_SETTINGS = { sound: true, haptics: true, gauge: false, unlockAll: false };
+const DEFAULT_SETTINGS = { sound: true, haptics: true, gauge: false, unlockAll: false, pieces: "a" };
 
 function read(key, fallback) {
   try {

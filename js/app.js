@@ -1022,6 +1022,8 @@ function renderSettings() {
           : '<p class="muted" style="margin:0">Install it: open the Share menu in Safari and choose Add to Home Screen (on Android, Install app). Do it once while you have signal.</p>'
       }
       <div class="group-head"><span>Play</span></div>
+      ${row("Pieces", "Two New York skylines.", `<div class="seg"><button class="text-btn ul" data-a="pieces" data-v="a" aria-pressed="${settings.pieces !== "b"}">Landmarks</button><span class="sep">|</span>
+        <button class="text-btn ul" data-a="pieces" data-v="b" aria-pressed="${settings.pieces === "b"}">Supertalls</button></div>`)}
       ${row("Sound", "Wooden clicks, synthesized. No files.", onoff("sound"))}
       ${row("Haptics", "A tap when pieces land.", onoff("haptics"))}
       ${row("Eval gauge", "A thin bar beside the board. Off trains your eye.", onoff("gauge"))}
@@ -1034,7 +1036,7 @@ function renderSettings() {
       <p class="muted" style="margin-top:8px">Games, puzzles and progress are stored only on this device.</p>
       <div class="group-head"><span>Credits</span></div>
       <p class="muted" style="margin:10px 0 0;line-height:1.5">Engine: Stockfish 19 (GPLv3), compiled to WebAssembly by Nathan Rugg.<br>
-      Rules: chess.js (BSD-2). Pieces: original flat set.<br>Type: Geist (OFL). Design: Photo Maps.</p>
+      Rules: chess.js (BSD-2). Pieces: original NYC skyline sets.<br>Type: Geist (OFL). Design: Photo Maps.</p>
     </div>`;
   paintOfflineLine();
 }
@@ -1262,6 +1264,13 @@ const actions = {
     save();
     renderSettings();
   },
+  pieces: (d) => {
+    settings.pieces = d.v;
+    document.documentElement.dataset.pieces = d.v;
+    fx.tap();
+    save();
+    renderSettings();
+  },
   exportall: () => copy(db.games.map((g) => g.pgn).join("\n\n")),
   erase: () =>
     confirmSheet("Erase everything?", "Games, puzzles and progress on this device will be deleted.", "Erase", () => {
@@ -1299,6 +1308,7 @@ window.addEventListener("resize", () => S.r && drawGraph());
 /* ───────────────────────── boot ───────────────────────── */
 
 fx.configure({ sound: settings.sound, haptics: settings.haptics });
+document.documentElement.dataset.pieces = settings.pieces;
 persist();
 
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
