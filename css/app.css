@@ -583,30 +583,18 @@ h2 {
   background-repeat: no-repeat;
   pointer-events: none;
 }
-.pc.wK { background-image: url("../vendor/pieces/a/wK.svg"); }
-.pc.wQ { background-image: url("../vendor/pieces/a/wQ.svg"); }
-.pc.wR { background-image: url("../vendor/pieces/a/wR.svg"); }
-.pc.wB { background-image: url("../vendor/pieces/a/wB.svg"); }
-.pc.wN { background-image: url("../vendor/pieces/a/wN.svg"); }
-.pc.wP { background-image: url("../vendor/pieces/a/wP.svg"); }
-.pc.bK { background-image: url("../vendor/pieces/a/bK.svg"); }
-.pc.bQ { background-image: url("../vendor/pieces/a/bQ.svg"); }
-.pc.bR { background-image: url("../vendor/pieces/a/bR.svg"); }
-.pc.bB { background-image: url("../vendor/pieces/a/bB.svg"); }
-.pc.bN { background-image: url("../vendor/pieces/a/bN.svg"); }
-.pc.bP { background-image: url("../vendor/pieces/a/bP.svg"); }
-:root[data-pieces="b"] .pc.wK { background-image: url("../vendor/pieces/b/wK.svg"); }
-:root[data-pieces="b"] .pc.wQ { background-image: url("../vendor/pieces/b/wQ.svg"); }
-:root[data-pieces="b"] .pc.wR { background-image: url("../vendor/pieces/b/wR.svg"); }
-:root[data-pieces="b"] .pc.wB { background-image: url("../vendor/pieces/b/wB.svg"); }
-:root[data-pieces="b"] .pc.wN { background-image: url("../vendor/pieces/b/wN.svg"); }
-:root[data-pieces="b"] .pc.wP { background-image: url("../vendor/pieces/b/wP.svg"); }
-:root[data-pieces="b"] .pc.bK { background-image: url("../vendor/pieces/b/bK.svg"); }
-:root[data-pieces="b"] .pc.bQ { background-image: url("../vendor/pieces/b/bQ.svg"); }
-:root[data-pieces="b"] .pc.bR { background-image: url("../vendor/pieces/b/bR.svg"); }
-:root[data-pieces="b"] .pc.bB { background-image: url("../vendor/pieces/b/bB.svg"); }
-:root[data-pieces="b"] .pc.bN { background-image: url("../vendor/pieces/b/bN.svg"); }
-:root[data-pieces="b"] .pc.bP { background-image: url("../vendor/pieces/b/bP.svg"); }
+.pc.wK { background-image: url("../vendor/pieces/wK.svg"); }
+.pc.wQ { background-image: url("../vendor/pieces/wQ.svg"); }
+.pc.wR { background-image: url("../vendor/pieces/wR.svg"); }
+.pc.wB { background-image: url("../vendor/pieces/wB.svg"); }
+.pc.wN { background-image: url("../vendor/pieces/wN.svg"); }
+.pc.wP { background-image: url("../vendor/pieces/wP.svg"); }
+.pc.bK { background-image: url("../vendor/pieces/bK.svg"); }
+.pc.bQ { background-image: url("../vendor/pieces/bQ.svg"); }
+.pc.bR { background-image: url("../vendor/pieces/bR.svg"); }
+.pc.bB { background-image: url("../vendor/pieces/bB.svg"); }
+.pc.bN { background-image: url("../vendor/pieces/bN.svg"); }
+.pc.bP { background-image: url("../vendor/pieces/bP.svg"); }
 .pc.lift {
   opacity: 0.25;
 }
@@ -881,3 +869,7 @@ textarea:focus-visible {
     transform: translateY(-1px);
   }
 }
+
+/* Board colours (Settings -> Board). */
+:root[data-pieces="a"] { --sq-l: #4b2424; --sq-d: #323232; }
+:root[data-pieces="b"] { --sq-l: #7b4b3b; --sq-d: #565656; }

@@ -1,129 +1,66 @@
-"""Generate the piece themes into vendor/pieces/<theme>/*.svg.
+"""Generate the Staunton piece set into vendor/pieces/*.svg.
 
-Minimalist metallic pieces built from three primitives: isometric prisms, pyramids and spheres,
-each shaded with brushed-metal gradients (lit top, mid left face, dark right face).
-  a "Platinum"  polished silver (white side) vs gunmetal (black side)
-  b "Gold"      champagne gold (white side) vs obsidian (black side)
-Height order: K > Q > B > R > N > P.
+Black set: near-black fill, white outline. White set: light-grey fill, black outline. Both get a soft
+drop shadow. Each piece is a union of simple shapes: an outline pass (thick stroke) then a fill pass,
+so seams between shapes vanish. Inner detail lines are drawn on top.
 """
 import pathlib
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent / "vendor" / "pieces"
-CX = 50
+OUT = pathlib.Path(__file__).resolve().parent.parent / "vendor" / "pieces"
 
+BASE = '<rect x="22" y="80" width="56" height="9" rx="4"/><rect x="29" y="72" width="42" height="10" rx="4"/>'
 
-def P(*pts):
-    return " ".join(f"{x:.2f},{y:.2f}" for x, y in pts)
-
-
-def prism(w, yt, yb, slot=False):
-    """Square prism seen isometrically: [(face, points)]. yt/yb are the left/right edge heights."""
-    d, l, r = w * 0.25, CX - w / 2, CX + w / 2
-    out = [
-        ("l", P((l, yt), (CX, yt + d), (CX, yb + d), (l, yb))),
-        ("r", P((CX, yt + d), (r, yt), (r, yb), (CX, yb + d))),
-        ("t", P((l, yt), (CX, yt - d), (r, yt), (CX, yt + d))),
-    ]
-    if slot:  # hollow top, for the rook
-        s = 0.3
-        out.append(("s", P((CX - w * s, yt), (CX, yt - d * 0.6), (CX + w * s, yt), (CX, yt + d * 0.6))))
-    return out
-
-
-def pyramid(w, yb, ytip):
-    d, l, r = w * 0.25, CX - w / 2, CX + w / 2
-    return [
-        ("l", P((l, yb), (CX, yb + d), (CX, ytip))),
-        ("r", P((CX, yb + d), (r, yb), (CX, ytip))),
-    ]
-
-
-def wedge(w, yt, yb, f):
-    """Prism whose top slopes down toward the front-right by f."""
-    d, l, r = w * 0.25, CX - w / 2, CX + w / 2
-    return [
-        ("l", P((l, yt), (CX, yt + d + f), (CX, yb + d), (l, yb))),
-        ("r", P((CX, yt + d + f), (r, yt + f), (r, yb), (CX, yb + d))),
-        ("t", P((l, yt), (CX, yt - d), (r, yt + f), (CX, yt + d + f))),
-    ]
-
-
-def sphere(cy, r):
-    return [("o", (CX, cy, r))]
-
-
-PLINTH = prism(46, 80, 88)
-
-SHAPES = {
-    "P": prism(26, 60, 80) + sphere(48, 11),
-    "R": prism(26, 38, 80) + prism(34, 24, 38, slot=True),
-    "N": prism(34, 66, 80) + wedge(26, 30, 66, 16),
-    "B": prism(24, 44, 80) + pyramid(24, 44, 8),
-    "Q": prism(32, 56, 80) + prism(22, 28, 56) + sphere(18, 9),
-    "K": prism(34, 58, 80) + prism(22, 32, 58) + prism(6, 8, 32) + prism(20, 16, 20),
+# (shapes, detail strokes)
+PIECES = {
+    "P": (
+        '<circle cx="50" cy="26" r="12"/><rect x="37" y="38" width="26" height="6" rx="3"/>'
+        '<path d="M41 44Q42 60 32 73H68Q58 60 59 44z"/>' + BASE,
+        ["M37 41h26"],
+    ),
+    "R": (
+        '<path d="M26 34V14h11v7h6v-7h14v7h6v-7h11v20z"/><rect x="31" y="32" width="38" height="6" rx="2"/>'
+        '<path d="M34 38L31 73H69L66 38z"/>' + BASE,
+        ["M30 35h40", "M36 52h28"],
+    ),
+    "N": (
+        '<path d="M27 76C27 60 31 50 40 43C34 44 29 48 24 53L18 46C21 38 32 31 40 26L38 14L47 21L52 10L58 21'
+        'C72 27 77 50 73 76z"/>' + BASE,
+        ["M37 33l-3 5", "M43 52q8-6 14-18"],
+        '<circle cx="45" cy="30" r="2.6" class="d"/>',
+    ),
+    "B": (
+        '<circle cx="50" cy="10" r="5"/><path d="M50 15C62 24 66 34 62 44H38C34 34 38 24 50 15z"/>'
+        '<rect x="34" y="44" width="32" height="7" rx="3.5"/><path d="M41 51Q42 62 33 73H67Q58 62 59 51z"/>' + BASE,
+        ["M50 24v13M44 30h12", "M43 40q-4-8 1-14"],
+    ),
+    "Q": (
+        '<path d="M27 46L21 22L37 33L41 16L50 31L59 16L63 33L79 22L73 46z"/>'
+        '<circle cx="21" cy="20" r="4"/><circle cx="41" cy="14" r="4"/><circle cx="59" cy="14" r="4"/><circle cx="79" cy="20" r="4"/>'
+        '<path d="M34 46L31 73H69L66 46z"/>' + BASE,
+        ["M30 48h40", "M37 60h26"],
+    ),
+    "K": (
+        '<rect x="46.5" y="2" width="7" height="22" rx="1.5"/><rect x="40" y="8" width="20" height="7" rx="1.5"/>'
+        '<path d="M31 46C28 30 38 22 50 22C62 22 72 30 69 46z"/><rect x="29" y="44" width="42" height="7" rx="3.5"/>'
+        '<path d="M35 51L31 73H69L65 51z"/>' + BASE,
+        ["M50 24v18", "M30 47h40", "M37 62h26"],
+    ),
 }
+STYLE = {"w": ("#d9d9d9", "#101010"), "b": ("#161616", "#f2f2f2")}
 
-# metal ramps: (offset, colour) stops per face; brushed bands give the polished look
-SILVER = dict(
-    t=[(0, "#ffffff"), (1, "#d3dae2")],
-    l=[(0, "#f4f6f9"), (0.45, "#c3cad3"), (0.5, "#8f99a6"), (1, "#dde2e8")],
-    r=[(0, "#b8c0ca"), (0.45, "#8a94a1"), (0.5, "#5a6471"), (1, "#8c96a3")],
-    o=[(0, "#ffffff"), (0.45, "#b9c1cb"), (1, "#566170")],
-)
-GUNMETAL = dict(
-    t=[(0, "#6a7280"), (1, "#323843")],
-    l=[(0, "#4a515d"), (0.45, "#2e333c"), (0.5, "#1a1d23"), (1, "#3a404a")],
-    r=[(0, "#2a2f37"), (0.45, "#181b20"), (0.5, "#0b0c0f"), (1, "#1c1f25")],
-    o=[(0, "#8a93a1"), (0.4, "#363c47"), (1, "#0d0f12")],
-)
-GOLD = dict(
-    t=[(0, "#fff6d0"), (1, "#ecd07a")],
-    l=[(0, "#fbe9a5"), (0.45, "#dcb95a"), (0.5, "#a8802a"), (1, "#e9cf7d")],
-    r=[(0, "#c9a042"), (0.45, "#a47c2a"), (0.5, "#6f4f16"), (1, "#a67f2e")],
-    o=[(0, "#fffbe6"), (0.4, "#e0bd5c"), (1, "#7a5718")],
-)
-OBSIDIAN = dict(
-    t=[(0, "#4b4f5a"), (1, "#1c1e24")],
-    l=[(0, "#33363f"), (0.45, "#1f2127"), (0.5, "#0e0f12"), (1, "#2a2d34")],
-    r=[(0, "#1a1c21"), (0.45, "#0f1013"), (0.5, "#050506"), (1, "#121316")],
-    o=[(0, "#7d828f"), (0.4, "#23262d"), (1, "#050506")],
-)
-THEMES = {"a": {"w": SILVER, "b": GUNMETAL}, "b": {"w": GOLD, "b": OBSIDIAN}}
-
-
-def gradients(pal):
-    out = []
-    for k, stops in pal.items():
-        s = "".join(f'<stop offset="{o}" stop-color="{c}"/>' for o, c in stops)
-        if k == "o":
-            out.append(f'<radialGradient id="g{k}" cx=".35" cy=".3" r=".8">{s}</radialGradient>')
-        else:
-            out.append(f'<linearGradient id="g{k}" x1="0" y1="0" x2="1" y2="1">{s}</linearGradient>')
-    return "".join(out)
-
-
-def render(parts, pal):
-    out = []
-    for face, geo in parts:
-        if face == "o":
-            cx, cy, r = geo
-            out.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="url(#go)"/>')
-        elif face == "s":
-            out.append(f'<polygon points="{geo}" fill="#000" fill-opacity=".45" stroke="none"/>')
-        else:
-            out.append(f'<polygon points="{geo}" fill="url(#g{face})"/>')
-    return "".join(out)
-
-
-for name, sides in THEMES.items():
-    out = ROOT / name
-    out.mkdir(parents=True, exist_ok=True)
-    for side, pal in sides.items():
-        for p, parts in SHAPES.items():
-            svg = (
-                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
-                f"<defs>{gradients(pal)}</defs>"
-                '<g stroke="#fff" stroke-opacity=".28" stroke-width=".7" stroke-linejoin="round">'
-                f"{render(PLINTH, pal)}{render(parts, pal)}</g></svg>"
-            )
-            (out / f"{side}{p}.svg").write_text(svg)
+for side, (fill, line) in STYLE.items():
+    for p, parts in PIECES.items():
+        shapes, strokes, *extra = parts
+        detail = "".join(f'<path d="{d}"/>' for d in strokes)
+        extra = (extra[0] if extra else "").replace('class="d"', f'fill="{line}" stroke="none"')
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
+            '<defs><filter id="s" x="-20%" y="-20%" width="150%" height="150%">'
+            '<feDropShadow dx="1.5" dy="2.5" stdDeviation="1.6" flood-color="#000" flood-opacity=".55"/></filter></defs>'
+            '<g filter="url(#s)">'
+            f'<g fill="{line}" stroke="{line}" stroke-width="5" stroke-linejoin="round">{shapes}</g>'
+            f'<g fill="{fill}" stroke="none">{shapes}</g></g>'
+            f'<g fill="none" stroke="{line}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{detail}</g>'
+            f"{extra}</svg>"
+        )
+        (OUT / f"{side}{p}.svg").write_text(svg)
