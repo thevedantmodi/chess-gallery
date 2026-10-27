@@ -1031,7 +1031,7 @@ function renderSettings() {
       <p class="muted" style="margin-top:8px">Games, puzzles and progress are stored only on this device.</p>
       <div class="group-head"><span>Credits</span></div>
       <p class="muted" style="margin:10px 0 0;line-height:1.5">Engine: Stockfish 19 (GPLv3), compiled to WebAssembly by Nathan Rugg.<br>
-      Rules: chess.js (BSD-2). Pieces: original Staunton set.<br>Type: Geist (OFL).</p>
+      Rules: chess.js (BSD-2). Pieces: original 8-bit set.<br>Type: Geist (OFL).</p>
     </div>`;
   paintOfflineLine();
 }
