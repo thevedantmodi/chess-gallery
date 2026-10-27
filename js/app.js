@@ -1017,8 +1017,8 @@ function renderSettings() {
           : '<p class="muted" style="margin:0">Install it: open the Share menu in Safari and choose Add to Home Screen (on Android, Install app). Do it once while you have signal.</p>'
       }
       <div class="group-head"><span>Play</span></div>
-      ${row("Board", "Two colour schemes.", `<div class="seg"><button class="text-btn ul" data-a="pieces" data-v="a" aria-pressed="${settings.pieces !== "b"}">Ember</button><span class="sep">|</span>
-        <button class="text-btn ul" data-a="pieces" data-v="b" aria-pressed="${settings.pieces === "b"}">Clay</button></div>`)}
+      ${row("Board", "Two colour schemes.", `<div class="seg"><button class="text-btn ul" data-a="pieces" data-v="a" aria-pressed="${settings.pieces !== "b"}">Sand</button><span class="sep">|</span>
+        <button class="text-btn ul" data-a="pieces" data-v="b" aria-pressed="${settings.pieces === "b"}">Slate</button></div>`)}
       ${row("Sound", "Wooden clicks, synthesized. No files.", onoff("sound"))}
       ${row("Haptics", "A tap when pieces land.", onoff("haptics"))}
       ${row("Eval gauge", "A thin bar beside the board. Off trains your eye.", onoff("gauge"))}

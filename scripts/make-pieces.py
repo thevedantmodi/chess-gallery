@@ -1,158 +1,194 @@
 """Generate the 8-bit piece set into vendor/pieces/*.svg.
 
-Each piece is a 14-wide silhouette drawn as text ('#' filled, 'x' detail). The outline, the lit left
-edge and the shaded right edge are derived automatically on a 16x16 pixel canvas, then written as
-crisp SVG rects (runs of the same colour are merged).
+Silhouettes were traced from the reference sprite sheet (9x18 pixels per piece, knight 10 wide).
+Black pieces are a solid silhouette; white pieces get a dark outline, a white lit edge, light fill and
+a shaded right edge, derived from the same silhouette. Written as crisp SVG rects on a 19x19 canvas.
 """
 import pathlib
 
 OUT = pathlib.Path(__file__).resolve().parent.parent / "vendor" / "pieces"
-N = 16
+N = 19  # canvas; pieces are bottom-aligned and centred
 
-SPRITES = {
+MASKS = {
     "P": [
-        ".....####.....",
-        "....######....",
-        "....######....",
-        ".....####.....",
-        "....######....",
-        ".....####.....",
-        ".....####.....",
-        "....######....",
-        "...########...",
-        "..##########..",
-        "..##########..",
+        "...###...",
+        "..#####..",
+        "..#####..",
+        "..#####..",
+        "...###...",
+        ".#######.",
+        ".#######.",
+        "..#####..",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        "#########",
+        "#########",
+        ".#######.",
     ],
     "R": [
-        "..##..##..##..",
-        "..##..##..##..",
-        "..##########..",
-        "..##########..",
-        "...########...",
-        "....######....",
-        "....######....",
-        "....######....",
-        "....######....",
-        "...########...",
-        "..##########..",
-        ".############.",
-        ".############.",
+        ".##.#.##.",
+        ".#######.",
+        ".#######.",
+        "#########",
+        "#########",
+        ".#######.",
+        "..#####..",
+        "..#####..",
+        "..#####..",
+        "..#####..",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        "#########",
+        "#########",
+        ".#######.",
     ],
     "N": [
-        "....#.#.......",
-        "...#####......",
-        "..#x#####.....",
-        ".#########....",
-        "###########...",
-        "###########...",
-        ".x#########...",
-        ".....######...",
-        "....#######...",
-        "....########..",
-        "...##########.",
-        ".############.",
-        ".############.",
+        "......#...",
+        "....####..",
+        "...######.",
+        "..########",
+        ".#########",
+        "##########",
+        "##########",
+        ".#########",
+        "...######.",
+        "..#######.",
+        "..#######.",
+        "...#####..",
+        "...#####..",
+        "..#######.",
+        "..#######.",
+        ".#########",
+        ".#########",
+        "..#######.",
     ],
     "B": [
-        "......##......",
-        ".....####.....",
-        ".....####.....",
-        "....##xx##....",
-        "....#xxxx#....",
-        "....##xx##....",
-        "....######....",
-        ".....####.....",
-        "...########...",
-        ".....####.....",
-        "....######....",
-        "...########...",
-        "..##########..",
-        ".############.",
+        "....#....",
+        "...###...",
+        "..#####..",
+        "...###...",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        ".#######.",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        "..#####..",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        "#########",
+        "#########",
+        ".#######.",
     ],
     "Q": [
-        "#...#.##.#...#",
-        "#...#.##.#...#",
-        "##.########.##",
-        ".############.",
-        "..##########..",
-        "....######....",
-        "....######....",
-        "....######....",
-        "...########...",
-        "....######....",
-        "....######....",
-        "...########...",
-        "..##########..",
-        ".############.",
+        "#...#...#",
+        "#.#.#.#.#",
+        "#########",
+        ".#######.",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        "..#####..",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        "..#####..",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        "#########",
+        "#########",
+        ".#######.",
     ],
     "K": [
-        "......##......",
-        "....######....",
-        "......##......",
-        "......##......",
-        "...########...",
-        "..##########..",
-        "..##########..",
-        "...########...",
-        "....######....",
-        "...########...",
-        "....######....",
-        "...########...",
-        "..##########..",
-        ".############.",
+        "....#....",
+        "...###...",
+        "....#....",
+        "...###...",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        "..#####..",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        "..#####..",
+        "..#####..",
+        ".#######.",
+        ".#######.",
+        "#########",
+        "#########",
+        ".#######.",
     ],
 }
+# single pixels (row, col) inside the mask: knight's eye
+DETAIL = {"N": [(4, 4)]}
 
-# o outline, f fill, h lit edge, s shaded edge, x detail
-PALETTE = {
-    "w": dict(o="#15151c", f="#dcdce2", h="#ffffff", s="#9090a0", x="#15151c"),
-    "b": dict(o="#f0f0f4", f="#2c2c34", h="#4c4c58", s="#131318", x="#f0f0f4"),
-}
+DARK, FILL, SHADE, LIGHT = "#2b2829", "#c8c0b8", "#9b948c", "#f1eee8"
+BLACK, EYE_ON_BLACK = "#312c2d", "#a39d9b"
 
 
-def build(rows):
-    """Place the silhouette bottom-aligned on a 16x16 grid and derive outline and shading."""
-    g = [["." for _ in range(N)] for _ in range(N)]
-    top = 14 - len(rows) + 1
-    for y, row in enumerate(rows):
-        for x, ch in enumerate(row):
-            if ch != ".":
-                g[top + y][1 + x] = ch  # '#' or 'x'
-    solid = lambda x, y: 0 <= x < N and 0 <= y < N and g[y][x] != "."
-    out = [r[:] for r in g]
-    for y in range(N):
-        for x in range(N):
-            if g[y][x] == ".":
-                if any(solid(x + dx, y + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
-                    out[y][x] = "o"
-            elif g[y][x] == "#":
-                if not solid(x + 1, y):
-                    out[y][x] = "s"
-                elif not solid(x - 1, y) or not solid(x, y - 1):
-                    out[y][x] = "h"
+def place(rows):
+    """Return {(x, y): True} for the silhouette, bottom-aligned and centred on the canvas."""
+    top = N - len(rows)
+    left = (N - 9) // 2
+    return {(left + x, top + y): (x, y) for y, r in enumerate(rows) for x, ch in enumerate(r) if ch == "#"}
+
+
+def colour_grid(piece, side):
+    rows = MASKS[piece]
+    cells = place(rows)
+    solid = lambda x, y: (x, y) in cells
+    col = {}
+    for (x, y), (mx, my) in cells.items():
+        if side == "b":
+            col[(x, y)] = BLACK
+            continue
+        edge = not (solid(x - 1, y) and solid(x + 1, y) and solid(x, y - 1) and solid(x, y + 1))
+        col[(x, y)] = DARK if edge else FILL
+    if side == "w":  # lit left, shaded right, per run of interior pixels
+        for y in range(N):
+            x = 0
+            while x < N:
+                if col.get((x, y)) == FILL:
+                    k = x
+                    while col.get((k, y)) == FILL:
+                        k += 1
+                    n = k - x
+                    if n >= 2:
+                        col[(k - 1, y)] = SHADE
+                    if n >= 4:
+                        col[(x, y)] = LIGHT
+                    x = k
                 else:
-                    out[y][x] = "f"
-    return out
+                    x += 1
+    for r, c in DETAIL.get(piece, []):
+        pos = next(p for p, (mx, my) in cells.items() if (my, mx) == (r, c))
+        col[pos] = DARK if side == "w" else EYE_ON_BLACK
+    return col
 
 
-def svg(grid, pal):
+def svg(col):
     rects = []
-    for y, row in enumerate(grid):
+    for y in range(N):
         x = 0
         while x < N:
-            ch = row[x]
-            if ch == ".":
+            c = col.get((x, y))
+            if not c:
                 x += 1
                 continue
             k = x
-            while k < N and row[k] == ch:
+            while col.get((k, y)) == c:
                 k += 1
-            rects.append(f'<rect x="{x}" y="{y}" width="{k - x}" height="1" fill="{pal[ch if ch != "#" else "f"]}"/>')
+            rects.append(f'<rect x="{x}" y="{y}" width="{k - x}" height="1" fill="{c}"/>')
             x = k
-    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">{"".join(rects)}</svg>'
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {N} {N}" shape-rendering="crispEdges">{"".join(rects)}</svg>'
 
 
-for p, rows in SPRITES.items():
-    grid = build(rows)
-    for side, pal in PALETTE.items():
-        (OUT / f"{side}{p}.svg").write_text(svg(grid, pal))
+for p in MASKS:
+    for side in "wb":
+        (OUT / f"{side}{p}.svg").write_text(svg(colour_grid(p, side)))

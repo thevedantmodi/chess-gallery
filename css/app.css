@@ -871,5 +871,5 @@ textarea:focus-visible {
 }
 
 /* Board colours (Settings -> Board). */
-:root[data-pieces="a"] { --sq-l: #4b2424; --sq-d: #323232; }
-:root[data-pieces="b"] { --sq-l: #7b4b3b; --sq-d: #565656; }
+:root[data-pieces="a"] { --sq-l: #e8dec8; --sq-d: #b4956c; }
+:root[data-pieces="b"] { --sq-l: #e2e6e9; --sq-d: #8d9eab; }
