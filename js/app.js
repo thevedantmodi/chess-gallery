@@ -273,6 +273,29 @@ function startGame() {
   if (!bot.pass && color === "b") engineMove();
 }
 
+/** Start a game against the selected opponent from a position reached by `sans`; you play the side to move. */
+function continueFrom(sans) {
+  const g = new Chess();
+  try {
+    for (const m of sans) g.move(m);
+  } catch {
+    return toast("Couldn't continue that game");
+  }
+  if (g.isGameOver()) return toast("That game is already over");
+  const bot = botById(S.setup.bot);
+  const color = bot.pass ? "w" : g.turn();
+  const begin = () => {
+    S.p = { game: g, bot, color, orient: color, id: uid(), thinking: false, sel: null, hint: null, over: false, rec: null };
+    db.current = { sans: g.history(), bot: bot.id, color };
+    save();
+    S.r = null;
+    go("play");
+    if (!bot.pass && g.turn() !== color) engineMove();
+  };
+  if (db.current) confirmSheet("Replace your game in progress?", "Continuing this game will discard it.", "Continue", begin);
+  else begin();
+}
+
 function resumeGame() {
   const c = db.current;
   if (!c) return;
@@ -629,6 +652,7 @@ function renderReview() {
       <div class="group-head"><span>Moves</span><span class="count">${N}</span></div>
       <div class="movelist" id="mlist"></div>
       <div class="actions" style="margin-top:20px">
+        <button class="text-btn ul" data-a="continue" style="font-weight:700">Play on from here</button>
         <button class="text-btn ul" data-a="copypgn">Copy PGN</button>
         <button class="text-btn ul" data-a="delgame">Delete</button>
       </div>
@@ -1046,7 +1070,7 @@ function importSheet() {
      <div class="seg" style="margin:12px 0"><span class="muted">I played</span>
        <button class="text-btn ul" data-c="w" aria-pressed="true">White</button><span class="sep">|</span>
        <button class="text-btn ul" data-c="b" aria-pressed="false">Black</button></div>
-     <div class="stack"><button class="btn block" data-s="go">Import</button><button class="btn ghost block" data-s="no">Cancel</button></div>`,
+     <div class="stack"><button class="btn block" data-s="go">Import</button><button class="btn ghost block" data-s="play">Import and play on</button><button class="btn ghost block" data-s="no">Cancel</button></div>`,
     (el) => {
       el.addEventListener("click", (e) => {
         const c = e.target.closest("[data-c]");
@@ -1092,6 +1116,7 @@ function importSheet() {
         db.games.unshift(rec);
         save();
         closeSheet();
+        if (b.dataset.s === "play") return continueFrom(g.history());
         S.r = null;
         openReview(rec.id, 0);
       });
@@ -1184,6 +1209,7 @@ const actions = {
     renderPlay();
   },
   open: (d) => openReview(d.id),
+  continue: () => continueFrom(S.r.moves.slice(0, S.r.idx).map((m) => m.san)),
   rback: () => {
     if (S.r) S.r.token = uid();
     S.r = null;

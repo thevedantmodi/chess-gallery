@@ -1,7 +1,7 @@
 // Offline-first service worker. Everything the app needs (engine, rules, pieces, fonts) is
 // precached on first visit, so after that it runs with no connection at all.
 // Bump VERSION when you ship a new build.
-const VERSION = "v13";
+const VERSION = "v14";
 const CACHE = `chess-${VERSION}`;
 
 const PRECACHE = [
