@@ -1,7 +1,7 @@
 // Offline-first service worker. Everything the app needs (engine, rules, pieces, fonts) is
 // precached on first visit, so after that it runs with no connection at all.
 // Bump VERSION when you ship a new build.
-const VERSION = "v10";
+const VERSION = "v11";
 const CACHE = `chess-${VERSION}`;
 
 const PRECACHE = [
@@ -19,6 +19,8 @@ const PRECACHE = [
   "vendor/stockfish-19-lite-single.wasm",
   "fonts/Geist-Regular.ttf",
   "fonts/Geist-SemiBold.ttf",
+  "icons/favicon.svg",
+  "icons/icon-32.png",
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/apple-touch-icon.png",

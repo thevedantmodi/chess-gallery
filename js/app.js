@@ -847,7 +847,7 @@ function renderRetake() {
       </div>
       ${
         open.length
-          ? `<button class="btn block" data-a="tstart">Start retaking</button>`
+          ? `<button class="btn block" data-a="tstart">Start puzzles</button>`
           : `<div class="placard"><span class="label">Nothing waiting</span><div class="meta">Analyze a finished game in the Games tab. Your blunders and mistakes arrive here as puzzles.</div>
              <div class="actions"><button class="text-btn ul" data-a="tab" data-t="games" style="font-weight:700">Go to Games</button></div></div>`
       }
