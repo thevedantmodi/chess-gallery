@@ -1034,7 +1034,7 @@ function renderSettings() {
       <p class="muted" style="margin-top:8px">Games, puzzles and progress are stored only on this device.</p>
       <div class="group-head"><span>Credits</span></div>
       <p class="muted" style="margin:10px 0 0;line-height:1.5">Engine: Stockfish 19 (GPLv3), compiled to WebAssembly by Nathan Rugg.<br>
-      Rules: chess.js (BSD-2). Pieces: Chessnut by Alexis Luengas (Apache 2.0).<br>Type: Geist (OFL). Design: Photo Maps.</p>
+      Rules: chess.js (BSD-2). Pieces: original flat set.<br>Type: Geist (OFL). Design: Photo Maps.</p>
     </div>`;
   paintOfflineLine();
 }

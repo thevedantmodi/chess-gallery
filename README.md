@@ -13,16 +13,11 @@ Stockfish 19 runs on the device (WebAssembly), so there is no server and no sign
 
 ## Put it on your phone (once, with signal)
 
-It's a static site, no build step. Pick one:
+It's a static site, no build step. Deploy to Vercel:
 
-    # Vercel (you already use it)
     cd chess-gallery && npx vercel --prod
 
-    # or GitHub Pages (workflow included in .github/workflows):
-    git init -b main && git add . && git commit -m "Chess Gallery"
-    gh repo create chess-gallery --public --source=. --push
-    gh api -X POST repos/{owner}/chess-gallery/pages -f build_type=workflow
-    # live in about a minute at https://<your-username>.github.io/chess-gallery/
+Or import the repo in the Vercel dashboard (framework: Other, no build command, output dir `.`).
 
 Then on the phone, **while online**:
 
@@ -53,12 +48,12 @@ version the next time they open it with a connection.
     js/board.js          tap + drag board
     js/engine.js         Stockfish worker wrapper (priority queue)
     js/store.js, fx.js   local storage; haptics and sound
-    vendor/              Stockfish 19 lite (1.7 MB wasm), chess.js, Chessnut pieces
-    scripts/make-icons.py
+    vendor/              Stockfish 19 lite (1.7 MB wasm), chess.js, flat piece SVGs
+    scripts/make-icons.py, make-pieces.py
 
 ## Licences
 
 Stockfish is GPLv3 (source: github.com/official-stockfish/Stockfish, and
 github.com/nmrugg/stockfish.js for the WebAssembly build). If you publish this site,
-publish its source too. chess.js is BSD-2. Chessnut pieces by Alexis Luengas are
-Apache 2.0. Geist is OFL.
+publish its source too. chess.js is BSD-2. Pieces are original (make-pieces.py).
+Geist is OFL.
